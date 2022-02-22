@@ -58,11 +58,11 @@ def batch_standardize(input):
 
 def batch_transform(input, scalers):
     scale = lambda x,s : s.transform(x) if(len(x.shape)==2) else s.transform([x])[0]
-    return np.array(list(map(scale, input, scalers)))
+    return np.array([scale(x, s) for x,s in zip(input, scalers)])
 
 def batch_inverse_transform(input, scalers):
     scale = lambda x,s : s.inverse_transform(x) if(len(x.shape)==2) else s.inverse_transform([x])[0]
-    return np.array(list(map(scale, input, scalers)))
+    return np.array([scale(x, s) for x,s in zip(input, scalers)])
 
 def columnify(arr):
     return np.transpose(arr.reshape(-1,arr.shape[-1]))
