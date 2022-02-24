@@ -87,6 +87,10 @@ def AR(real_o,pred_o):
             res+=real_o[i+1]-real_o[i]
     return res/(len(real_o)-1)
 
+def metrics(real_o,pred_o):
+    return {"MAE" :  MAE(real_o,pred_o), "RMSE" : RMSE(real_o,pred_o), "MAPE" : MAPE(real_o,pred_o),  "AR" : AR(real_o,pred_o)}
+    
+
 # In[8]:
 
 

@@ -4,5 +4,5 @@ An implementationof the GAN stock prediction modelfrom [Stock Market Prediction 
 
 Gan Tutorial: https://colab.research.google.com/github/tensorflow/gan/blob/master/tensorflow_gan/examples/colab_notebooks/tfgan_tutorial.ipynb#scrollTo=XSTQ5Flu7FMP
 
-Gan with LSTM Tutorial: https://www.kaggle.com/scratchpad/notebook1d0fe4e256/edit
+Gan with LSTM Tutorial: https://www.kaggle.com/function9/bidirectional-lstm-gan-music-generation
 
