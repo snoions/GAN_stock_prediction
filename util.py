@@ -24,7 +24,6 @@ def merge_time_series(arr1, arr2) -> tf.float64 :
     t2 = tf.cast(arr2, 'float64') if tf.is_tensor(arr2) else tf.convert_to_tensor(arr2, dtype='float64')
     return tf.concat([t1, t2 ], axis=1)
 
-#TODO: support multiple output timesteps
 def split_time_series(len_i,len_o, arr) -> (np.array, np.array):
     a = []
     b = []
@@ -33,11 +32,17 @@ def split_time_series(len_i,len_o, arr) -> (np.array, np.array):
         b.append(arr[i+len_i:i+len_i+len_o])
     return (np.array(a), np.array(b))
 
-def moving_average(len_i, arr) -> np.array:
+def moving_average(step_o, arr) -> np.array:
     res = []
-    for i in range(len(arr)-len_i):
-        a = arr[i: i+len_i]
+    for i in range(len(arr)-step_o):
+        a = arr[i: i+step_o]
         res.append(sum(a)/len(a))
+    return np.array(res)
+
+def scalers_extract_mean(step_o, scalers) -> np.array:
+    res = []
+    for s in scalers:
+        res.append([s.mean_] * step_o)
     return np.array(res)
 
 def split_time_series_disjoint(len_i,len_o, arr) -> (np.array, np.array):
