@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[7]:
-
-
 import tensorflow as tf
 tf.compat.v1.enable_eager_execution() 
 import numpy as np
@@ -12,25 +6,50 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
 import math
 
-def load_data(path):
+def load_data(path) -> np.array:
     # TODO: test, train split
-    x_train = np.array(pd.read_csv(path).drop([0]).drop(columns=['Date']))
-    return x_train
+    x = np.array(pd.read_csv(path).drop([0]).drop(columns=['Date']))
+    return x
             
 # data processing functions
-
+def k_fold_index_split(length, num_fold):
+    idx = [ i for i in range(0, length)]
+    np.random.shuffle(idx)
+    batch_size = math.floor(length / num_fold)
+    remainder = length % num_fold
+    batches = []
+    for i in range(0, num_fold):
+        start = i * batch_size
+        end = start + batch_size + 1 if i < remainder else start + batch_size
+        batches.append( idx[start : end])
+    return batches
+    
 def merge_time_series(arr1, arr2) -> tf.float64 :
     t1 = tf.cast(arr1, 'float64') if tf.is_tensor(arr1) else tf.convert_to_tensor(arr1, dtype='float64')
     t2 = tf.cast(arr2, 'float64') if tf.is_tensor(arr2) else tf.convert_to_tensor(arr2, dtype='float64')
     return tf.concat([t1, t2 ], axis=1)
 
-def split_time_series(len_i,len_o, arr) -> (np.array, np.array):
-    a = []
-    b = []
-    for i in range(len(arr)-len_i-len_o + 1):
-        a.append(arr[i: i+len_i]) 
-        b.append(arr[i+len_i:i+len_i+len_o])
-    return (np.array(a), np.array(b))
+def group_time_series(length, arr) -> np.array:
+    res = []
+    for i in range(len(arr)-length):
+        res.append(arr[i: i+length])
+    return np.array(res)
+                   
+def group_time_series_disjoint(length, arr) -> np.array:
+    res = []
+    for i in range(0, len(arr)-length, length):
+        res.append(arr[i: i+length])
+    return np.array(res)
+
+def split_input_output(step_i, step_o, data) -> (np.array, np.array):
+    if data.shape[1] != step_i + step_o:
+        raise ValueError(f"unable to split data of {data.shape[1]} steps into input of {step_i} steps and output of {step_o} steps")
+    input_data = []
+    output_data = []   
+    for d in data:
+      input_data.append(d[:step_i])
+      output_data.append(d[step_i : step_i + step_o])
+    return (np.array(input_data), np.array(output_data))
 
 def moving_average(step_o, arr) -> np.array:
     res = []
@@ -44,14 +63,6 @@ def scalers_extract_mean(step_o, scalers) -> np.array:
     for s in scalers:
         res.append([s.mean_] * step_o)
     return np.array(res)
-
-def split_time_series_disjoint(len_i,len_o, arr) -> (np.array, np.array):
-    a = []
-    b = []
-    for i in range(0, len(arr)-len_i-len_o + 1,  len_o):
-        a.append(arr[i: i+len_i])
-        b.append(arr[i+len_i:i+len_i+len_o])
-    return (np.array(a), np.array(b))
 
 def batch_standardize(input):
     def standardize_fn(i) : 
@@ -94,26 +105,3 @@ def AR(real_o,pred_o):
 
 def metrics(real_o,pred_o):
     return {"MAE" :  MAE(real_o,pred_o), "RMSE" : RMSE(real_o,pred_o), "MAPE" : MAPE(real_o,pred_o),  "AR" : AR(real_o,pred_o)}
-    
-
-# In[8]:
-
-
-#tests
-# data = oad_data("./data_stock/SP500_average.csv")
-# (input, output) = split_time_series(5, 5, data)
-# (djt_input, djt_output) = split_time_series_disjoint(5, 5, data)
-# print(f'input shape, {input.shape}, output shape, {output.shape}')
-# merged = merge_time_series(input, output)
-# standardized = batch_standardize(input)
-# MA5 = moving_average(data)
-# print("input",input)
-# print("output", output)
-# print("djt_input",djt_input)
-# print("djt_input", djt_output)
-# print("merged",merged)
-# print("standardized", standardized)
-# print("MA5", MA5)
-
-
-
