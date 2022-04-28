@@ -8,8 +8,10 @@ import math
 
 def load_data(path) -> np.array:
     # TODO: test, train split
-    x = np.array(pd.read_csv(path).drop([0]).drop(columns=['Date']))
-    return x
+    dataset = pd.read_csv(path)
+    titles = dataset.head()
+    cleaned_data = dataset.drop([0]).drop(columns=['Date'])
+    return cleaned_data, titles
             
 # data processing functions
 def k_fold_index_split(length, num_fold):
